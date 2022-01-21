@@ -1,0 +1,13 @@
+{
+  "name": "pxl-discord-bot",
+  "version": "1.0.0",
+  "description": "A discord bot for pxl-server",
+  "main": "index.js",
+  "repository": "https://github.com/lyriouz/pxl-discord-bot.git",
+  "author": "TyfangXV <9fangdev@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^13.6.0",
+    "dotenv": "^14.2.0"
+  }
+}
