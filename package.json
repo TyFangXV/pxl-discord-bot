@@ -2,12 +2,22 @@
   "name": "pxl-discord-bot",
   "version": "1.0.0",
   "description": "A discord bot for pxl-server",
-  "main": "index.js",
+  "main": "./src/index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "nodemon .",
+    "mungo": "node ./utils/cli/mungo.js"
+  },
   "repository": "https://github.com/lyriouz/pxl-discord-bot.git",
   "author": "TyfangXV <9fangdev@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "discord.js": "^13.6.0",
-    "dotenv": "^14.2.0"
+    "dotenv": "^14.2.0",
+    "inquirer": "^8.2.0"
+  },
+  "devDependencies": {
+    "chalk": "^4.1.2",
+    "nodemon": "^2.0.15"
   }
 }
