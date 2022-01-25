@@ -1,8 +1,9 @@
 require('dotenv').config();
 const fs = require('fs');
 const discord = require('discord.js');
+const uuid = require('uuid').v4;
 
-const selectMenuInteractionEventHandler = require("./state/interactionEvent");
+const interactionState = require("./state/interaction");
 const config = require('./config.js');
 const menuInteractionHanlder = require("./handler/interaction")
 
@@ -30,10 +31,15 @@ config.command.forEach((cmd) => {
 
 
 
-client.on('ready', () => console.log('I am ready!'));
+client.on('ready', () => {
+  client.user.setStatus('online');
+  client.user.setActivity('Powered by Swag');
+  console.log("Bot is online");
+});
+
+
 
 client.on('messageCreate',  (message) => {
-        console.log(message.content);
         //check if message started with prefix
         if (!message.content.startsWith(prefix) || message.author.bot) return;
 
@@ -43,8 +49,11 @@ client.on('messageCreate',  (message) => {
 
             if(client.command.has(command))
             {
-                client.command.get(command).execute(message);
+                const id = uuid();
+                interactionState.add({command : command, id : id, authorID :  message.author.id})
+                client.command.get(command).execute(message, client);
             }
+
 
         }
 });
