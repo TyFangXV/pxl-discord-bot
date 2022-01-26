@@ -40,6 +40,7 @@ client.on('ready', () => {
 
 
 client.on('messageCreate',  (message) => {
+       if (message.author.bot) return;
         //check if message started with prefix
         if (!message.content.startsWith(prefix) || message.author.bot) return;
 
@@ -57,6 +58,15 @@ client.on('messageCreate',  (message) => {
 
         }
 });
+
+/*
+
+
+
+const userMember = await message.guild.members.fetch(user)
+userMember.hasPermission()
+
+*/
 
 
 client.on("interactionCreate", async(interaction)=>{   

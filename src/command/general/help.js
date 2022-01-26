@@ -10,6 +10,20 @@ module.exports = {
   description: 'to help players navigate',
   mode: 'general',
   async execute(message, client) {
+
+    //get the command name from the args then check if it exists and execute it
+    const command = message.content.slice(config.prefix.length).trim().split(/ +/);
+    const commandName = command[1];
+
+    if (commandName) {
+    if(client.command.has(commandName) && commandName !== 'help'){
+      client.command.get(commandName).helpCenter(message);
+    }else{
+      message.channel.send("Command not found");
+    }
+    }
+
+    if(!commandName){
     const embed = new discord.MessageEmbed()
       .setColor('#0099ff')
       .setTitle('Help')
@@ -51,7 +65,7 @@ module.exports = {
             files.forEach((file) => {
               const command = require(`../../command/${msg.value}/${file}`);
               if (command.name !== 'help') {
-                helpEmbed.addField(command.name, command.description, true);
+                helpEmbed.addField(`>${command.name}`, command.description, true);
               }
             });
           }
@@ -64,5 +78,7 @@ module.exports = {
 
     const row = new MessageActionRow().addComponents(menu);
     message.author.send({ embeds: [embed], components: [row] });
+  }
   },
+  
 };
