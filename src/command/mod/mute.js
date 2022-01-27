@@ -2,6 +2,9 @@ const supabase = require('../../../utils/supabase/initialize');
 const config = require('../../config');
 const { Permissions } = require('discord.js');
 const Discord = require('discord.js');
+let prefix;
+
+(async()=> prefix = await config.prefix())()
 
 
 const TimeValidator = (time) => {
@@ -22,7 +25,6 @@ const TimeValidator = (time) => {
   }
 };
 
-
 module.exports = {
   name: 'mute',
 
@@ -33,10 +35,14 @@ module.exports = {
   async execute(message, client) {
     const user = message.mentions.users.first();
     //get the args from the message
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/);
+    const args = message.content.slice(await config.prefix().length).trim().split(/ +/);
     const duration = args.slice(2)[0];
     const reason = args.slice(3).join(' ');
-    const mutedRole = 'muted';
+
+    const roles = new Set();
+    message.guild.roles.cache.forEach(async(role) => {
+      roles.add(role);
+    })
 
     //check if the nessessary args are present
     if (!duration || !reason) {
@@ -46,20 +52,20 @@ module.exports = {
 
     const DuratioValidation = TimeValidator(duration);
 
-
-    if(DuratioValidation === false){
+    if (DuratioValidation === false) {
       const embed = new Discord.MessageEmbed()
         .setColor('#0099ff')
         .setTitle('Error')
-        .setDescription(`Please enter a valid time; For more info type "**${config.prefix}help mute**"`)
+        .setDescription(
+          `Please enter a valid time; For more info type "**$prefix}help mute**"`
+        )
         .setThumbnail(message.author.avatarURL())
         .setTimestamp();
-      message.channel.send({embeds : [embed]});
+      message.channel.send({ embeds: [embed] });
       return;
     }
 
     try {
-
       //check if the user isn't muted, they are in the guild, and they aren't a admin
 
       if (!user) {
@@ -71,6 +77,10 @@ module.exports = {
       if (member === undefined) {
         return message.channel.send('That user is not in this server');
       }
+
+      //check if the user has the mod, admin or owner role
+      if(roles.has())
+
       if (member.permissions.has(Permissions.FLAGS.ADMINISTRATOR)) {
         return message.channel.send('You cannot mute an administrator');
       }
@@ -85,24 +95,36 @@ module.exports = {
       const role = message.guild.roles.cache.find(
         (role) => role.name === mutedRole
       );
-      member.roles.add(role);
 
-        const res = await supabase.from('mute').insert({
-          user_id: user.id,
-          guild_id: message.guild.id,
-          minutes : DuratioValidation,
-          reason: args.slice(1).join(' ') || 'No reason provided',
-        });
+      const res = await supabase.from('mute').insert({
+        user_id: user.id,
+        guild_id: message.guild.id,
+        channel_id: message.channel.id,
+        duration: DuratioValidation.toString(),
+        time: new Date(),
+        reason: args.slice(3).join(' ') || 'No reason provided',
+      });
 
+      //check if the mute is registered in the database
+      console.log(res);
+      if (res !== null) {
         const embed = new Discord.MessageEmbed()
           .setColor('#0099ff')
           .setTitle('Mute')
-          .setDescription(`${user} has been muted for ${duration} for ${args.slice(3).join(' ')|| 'No reason provided'} `)
+          .setDescription(
+            `${user} has been muted for ${duration} for ${
+              args.slice(3).join(' ') || 'No reason provided'
+            } `
+          )
           .setThumbnail(member.avatar)
           .setTimestamp();
-        message.channel.send({embeds : [embed]});
-
-
+        message.channel.send({ embeds: [embed] });
+        //add the role to the user
+        member.roles.add(role);
+        return;
+      } else {
+        console.log(res.error);
+      }
     } catch (error) {
       console.log(error);
       message.channel.send(
@@ -116,15 +138,15 @@ module.exports = {
       .setTitle('Help Center')
       .setColor('#0099ff')
       .setDescription('**Mute**')
-      .addField('Usage', `${config.prefix}mute @user <duration> <reason>`)
+      .addField('Usage', `${prefix}mute @user <duration> <reason>`)
       .addField('Description', 'Mute a user')
-      .addField('Example', `${config.prefix}mute @drex 3m spam`)
+      .addField('Example', `${prefix}mute @drex 3m spam`)
       .addField(
         'Supported duration',
         `**1m** = 1 minute\n**1h** = 1 hour\n**1d** = 1 day\n`
       )
       .addField('Permission', 'Moderator')
       .setTimestamp();
-    message.channel.send({embeds: [embed]});
+    message.channel.send({ embeds: [embed] });
   },
 };

@@ -11,8 +11,9 @@ module.exports = {
   mode: 'general',
   async execute(message, client) {
 
+    const prefix = await config.prefix();
     //get the command name from the args then check if it exists and execute it
-    const command = message.content.slice(config.prefix.length).trim().split(/ +/);
+    const command = message.content.slice(prefix.length).trim().split(/ +/);
     const commandName = command[1];
 
     if (commandName) {
